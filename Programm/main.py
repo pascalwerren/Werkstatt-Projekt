@@ -13,6 +13,9 @@ def delete4():
 
 def delete8():
     screen8.destroy()
+
+def delete7():
+    screen7.destroy()
   
 def login_sucess():
   global screen3
@@ -37,8 +40,6 @@ def deleteuser():
     delete2()
     connection.commit()
 
-
-
 def password_not_recognised():
   global screen4
   screen4 = Toplevel(screen)
@@ -55,27 +56,54 @@ def user_not_found():
   Label(screen5, text = "Benutzer konnte nicht gefunden werden").pack()
   Button(screen5, text = "OK", command =delete4).pack()
 
+def namechanged():
+  global screen9
+  screen9 = Toplevel(screen)
+  screen9.title("Erfolgreich!")
+  screen9.geometry("600x100")
+  Label(screen9, text = "Der Name wurde erfolgreich geändert. Beim nächsten einloggen wird der alte Name nicht mehr gehen!").pack()
+
+def pwchanged():
+  global screen10
+  screen10 = Toplevel(screen)
+  screen10.title("Erfolgreich!")
+  screen10.geometry("600x100")
+  Label(screen10, text = "Das Passwort wurde erfolgreich geändert. Beim nöchsten einloggen wird das alte nicht mehr gehen!").pack()
+
 def changenameindb():
     newname1 = newnamestr.get()
-
-    command = f"SET username = '{newname1} WHERE username = {userlogged}'"
+    global userlogged
+    oldname = userlogged
+    command = f"UPDATE users SET username = '{newname1}' WHERE username = '{oldname}'"
     cursor.execute(command)
-
+    namechanged()
     connection.commit
     userlogged = newname1
 
 def changepasswort():
     global screen7
+    global newpw
     screen7 = Toplevel(screen)
     screen7.title("Passwort ändern")
     screen7.geometry("300x100")
 
+    newpw = StringVar()
+
     Label(screen7, text = "Neues Passwort").pack()
     newpw = Entry(screen7)
     newpw.pack()
-    Label(screen7, text = "").pack()
-    Button(screen7, text = "Ändern", width = 10, height = 1).pack()
+    Label(screen7, text = "", textvariable = newpw).pack()
+    Button(screen7, text = "Ändern", width = 10, height = 1, command=changepw).pack()
 
+def changepw():
+    newpw1 = newpw.get()
+    global passwordlogged
+    oldpw = passwordlogged
+    command = f"UPDATE users SET password = '{newpw1}' WHERE password = '{oldpw}'"
+    cursor.execute(command)
+    pwchanged()
+    connection.commit
+    passwordlogged = newpw1
 def changename():
   global screen6
   global newnamestr
@@ -83,6 +111,8 @@ def changename():
   screen5 = Toplevel(screen)
   screen5.title("Name ändern")
   screen5.geometry("300x100")
+
+  newnamestr = StringVar()
 
   Label(screen5, text = "Neuer Name").pack()
   newname = Entry(screen5, textvariable = newnamestr)
@@ -109,9 +139,11 @@ def register_user():
 def login_verify():
   
   global userlogged
+  global passwordlogged
   username1 = username_verify.get()
   userlogged = username1
   password1 = password_verify.get()
+  passwordlogged = password1
   username_entry1.delete(0, END)
   password_entry1.delete(0, END)
 
@@ -215,7 +247,5 @@ CREATE TABLE IF NOT EXISTS users(user_id INTEGER PRIMARY KEY, username TEXT, pas
 cursor.execute(tabelle_accounts)
 
 connection.commit()
-
-print(userindb("asd"))
 main_screen()
 
